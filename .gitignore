@@ -1,0 +1,16 @@
+﻿.venv/
+venv/
+__pycache__/
+*.pyc
+.env
+db/*.db
+db/*.db-journal
+db/*.sqlite
+db/*.sqlite3
+artifacts/
+.pytest_cache/
+.streamlit/secrets.toml
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

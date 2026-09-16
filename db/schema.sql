@@ -1,0 +1,2 @@
+﻿-- Esquema versionado de la base de datos (SQLite).
+-- Se completa en la Fase 5 del desarrollo.
