@@ -1,9 +1,10 @@
 """Enriquecimiento de conversaciones con IA (Fase 3): proveedor configurable, fallback deterministico y cache."""
 import re
 import json
+import httpx
+import time
 from pathlib import Path
 
-import httpx
 
 RAIZ = Path(__file__).resolve().parent.parent
 RUTA_CACHE = RAIZ / "artifacts" / "extracciones.json"
@@ -135,15 +136,30 @@ def parsear_json(texto):
         return None
 
 
+MODELOS_GEMINI = ["gemini-3.6-flash", "gemini-3.5-flash",
+                  "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"]
+
 def llamar_gemini(texto, cfg):
     from google import genai
+    from google.genai import errors as genai_errors
     cliente = genai.Client(api_key=cfg.get("GEMINI_API_KEY"))
-    resp = cliente.models.generate_content(
-        model=cfg.get("GEMINI_MODEL", "gemini-2.5-flash"),
-        contents=PROMPT.format(conversacion=texto[:4000]),
-    )
-    return resp.text
-
+    principal = cfg.get("GEMINI_MODEL", "gemini-3.6-flash")
+    modelos = [principal] + [m for m in MODELOS_GEMINI if m != principal]
+    contenido = PROMPT.format(conversacion=texto[:4000])
+    for modelo in modelos:
+        for intento in range(2):
+            try:
+                resp = cliente.models.generate_content(model=modelo, contents=contenido)
+                return resp.text
+            except genai_errors.ClientError as e:
+                if e.code == 404:  # modelo inexistente: probar el siguiente
+                    break
+                if e.code == 401:  # clave invalida: no insistir
+                    raise
+                time.sleep(1)
+            except Exception:
+                time.sleep(1)
+    raise RuntimeError("Gemini agotado")
 
 def llamar_compatible(texto, cfg):
     """GROQ / CEREBRAS / OPENROUTER: mismas rutas estilo OpenAI."""

@@ -8,3 +8,4 @@ python-dotenv>=1.0
 pytest>=8.2
 requests>=2.32
 rapidfuzz>=3.9
+google-genai
