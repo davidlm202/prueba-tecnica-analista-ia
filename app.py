@@ -73,7 +73,7 @@ def main():
             "grupo_id", "score", "motivos", "origen"]
     st.dataframe(
         vista.sort_values("score", ascending=False).head(top_n)[cols],
-        use_container_width=True, hide_index=True,
+        width="stretch", hide_index=True,
     )
 
     col_a, col_b = st.columns(2)
@@ -95,7 +95,7 @@ def main():
 
     if debug:
         st.subheader("Datos en bruto")
-        st.dataframe(vista.head(500), use_container_width=True, hide_index=True)
+        st.dataframe(vista.head(500), width="stretch", hide_index=True)
 
 
 if __name__ == "__main__":
