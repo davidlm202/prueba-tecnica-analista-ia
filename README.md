@@ -5,7 +5,8 @@ asesores comerciales**, enriquecida con IA generativa (Gemini), persistida en
 SQLite y visualizada en un dashboard interactivo.
 
 > Motos y Motores del Norte S.A.S. | 1501 leads normalizados · 1357 grupos
-> deduplicados · 657/677 conversaciones extraídas por IA · Dashboard desplegado.
+> deduplicados · 657/677 conversaciones extraídas por IA.
+> **Demo en vivo:** https://hjmncfb8wdvbs3fbpmkzu8.streamlit.app/
 
 ---
 
