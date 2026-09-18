@@ -47,30 +47,35 @@ def main():
     st.title("Panel de Priorizacion de Leads - Inteligencia Artificial")
     st.caption("Pipeline: normalizacion -> deduplicacion -> IA Gemini -> scoring -> BD")
 
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Leads unicos", f"{len(df):,}")
-    c2.metric("Grupos deduplicados", f"{len(grupos):,}")
-    c3.metric("Conversaciones IA", f"{n_extra:,}", f"{n_ia:,} por IA")
-    c4.metric("Score promedio", f"{df['score'].mean():.0f}")
-
     canales = sorted(df["canal_norm"].dropna().unique())
     estados = sorted(df["estado_norm"].dropna().unique())
+    empresas = sorted(df["empresa_id"].dropna().unique())
     with st.sidebar:
         st.header("Filtros")
+        sel_empresa = st.selectbox("Empresa", ["Todas"] + empresas)
         sel_canal = st.multiselect("Canal", canales, default=[])
         sel_estado = st.multiselect("Estado", estados, default=[])
         top_n = st.slider("Top leads", 10, 50, 30)
         debug = st.checkbox("Mostrar datos en bruto (debug)")
 
     vista = df
+    if sel_empresa != "Todas":
+        vista = vista[vista["empresa_id"] == sel_empresa]
     if sel_canal:
         vista = vista[vista["canal_norm"].isin(sel_canal)]
     if sel_estado:
         vista = vista[vista["estado_norm"].isin(sel_estado)]
 
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Leads unicos", f"{len(vista):,}")
+    n_grupos = vista["grupo_id"].nunique() if sel_empresa != "Todas" else len(grupos)
+    c2.metric("Grupos deduplicados", f"{n_grupos:,}")
+    c3.metric("Conversaciones IA", f"{n_extra:,}", f"{n_ia:,} por IA")
+    c4.metric("Score promedio", f"{vista['score'].mean():.0f}")
+
     st.subheader(f"Top {top_n} leads a priorizar por el asesor")
-    cols = ["lead_id", "nombre_cliente", "ciudad_norm", "canal_norm", "estado_norm",
-            "grupo_id", "score", "motivos", "origen"]
+    cols = ["lead_id", "nombre_cliente", "empresa_id", "ciudad_norm", "canal_norm",
+            "estado_norm", "grupo_id", "score", "motivos", "origen"]
     st.dataframe(
         vista.sort_values("score", ascending=False).head(top_n)[cols],
         width="stretch", hide_index=True,

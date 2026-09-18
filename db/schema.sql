@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS leads (
     email          TEXT,
     ciudad_norm    TEXT,
     departamento   TEXT,
+    empresa_id     TEXT,
+    punto_venta_id TEXT,
     canal_norm     TEXT,
     estado_norm    TEXT,
     fecha_registro TEXT,

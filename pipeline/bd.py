@@ -68,7 +68,8 @@ def preparar_leads():
 def poblar_bd(conn):
     leads, identidades = preparar_leads()
     cols = ["lead_id", "nombre_cliente", "telefono_norm", "email", "ciudad_norm",
-            "departamento", "canal_norm", "estado_norm", "fecha_registro",
+            "departamento", "empresa_id", "punto_venta_id", "canal_norm",
+            "estado_norm", "fecha_registro",
             "horas_al_contacto", "sku_matcheado", "score_match", "precio_lista",
             "grupo_id", "es_maestro", "nombre_norm"]
     leads[cols].to_sql("leads", conn, if_exists="replace", index=False)

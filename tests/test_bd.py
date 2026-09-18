@@ -28,3 +28,12 @@ def test_join_priorizacion():
     assert len(filas) == 3
     assert all(f[1] >= 0 for f in filas)
     conn.close()
+
+def test_separacion_por_empresa():
+    conn = _bd()
+    cur = conn.cursor()
+    cur.execute("SELECT empresa_id, COUNT(*) FROM leads GROUP BY empresa_id")
+    filas = cur.fetchall()
+    conn.close()
+    assert len(filas) == 3
+    assert sum(c for _, c in filas) == 1501
