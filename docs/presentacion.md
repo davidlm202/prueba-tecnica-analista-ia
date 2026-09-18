@@ -35,4 +35,4 @@ estado y ciudad, con filtros para el asesor.
 
 ## L8 Sustentamiento y cierre
 CI diario (06:05 Bogotá) reelabora scores automáticamente; prueba: un clon
-corre en minutos. 16 pruebas automatizadas, 9 fases versionadas (F0–F8).
+corre en minutos. 16 pruebas automatizadas, 17 fases versionadas (F0–F8).

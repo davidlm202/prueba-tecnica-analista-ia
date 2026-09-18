@@ -70,7 +70,7 @@ db/schema.sql           Esquema SQLite versionado
 db/motos.db             Base generada (gitignored)
 artifacts/              extracciones IA y scoring (versionados)
 data/entregados/        Datasets del reto
-tests/                  Suite pytest (16 pruebas)
+tests/                  Suite pytest (17 pruebas)
 .github/workflows/      CI: pruebas + corrida diaria automatizada
 ```
 
@@ -91,6 +91,30 @@ tests/                  Suite pytest (16 pruebas)
 
 ## Automatización (sustentamiento)
 
-`GitHub Actions` corre las 16 pruebas en cada push y ejecuta el pipeline completo
+`GitHub Actions` corre las 17 pruebas en cada push y ejecuta el pipeline completo
 todos los días (06:05 hora Bogotá), garantizando la regeneración del SCD sin
 intervención manual — el modelo se reentrena y los scores se actualizan.
+
+## Decisiones tomadas
+
+- **Priorización con modelo supervisado y no solo reglas**: el reto permitía criterio simple, pero se entrenó una regresión logística sobre `historico_cierres.csv` (la única fuente con desenlace real). Resultado: AUC 0.60 y lift de 1.53× en el top 20% — los leads priorizados convierten ~50% más que el promedio. El score es explicable por los "motivos" asociados a cada lead.
+- **IA agnóstica al proveedor**: capa `LLM_PROVIDER` (GEMINI / GROQ / CEREBRAS / OPENROUTER) con respaldo determinista y cache en `artifacts/extracciones.json`. Con el cache lleno la demo no hace llamadas a la API y el pipeline nunca se cae.
+- **Deduplicación por tres reglas** (teléfono / nombre+ciudad / email) → 1.357 grupos de identidad. El maestro del grupo es el lead con más datos; el scoring se aplica por lead.
+- **SQLite como almacenamiento final**: suficiente para el volumen del reto y mantiene el repositorio 100% auto-contenido. El esquema está versionado en `db/schema.sql`.
+- **Separación por empresa**: `empresa_id` y `punto_venta_id` se persisten en la base de datos y el dashboard filtra por comercializadora, garantizando el aislamiento entre empresas del grupo.
+
+## Supuestos asumidos
+
+- Los datos son sintéticos; no se expone información real de clientes en el repositorio.
+- Ante `horas_al_contacto` faltante se usa la mediana histórica; ante `numero_contactos` faltante se estima desde la cantidad de mensajes de la conversación.
+- La intención de pago por "crédito" se infiere cuando la extracción detecta una cuota mensual en la conversación.
+- Los leads extraídos por respaldo determinista (20 de 677) se incluyen en el scoring en igualdad de condiciones; su origen queda etiquetado para trazabilidad.
+- El score es una prioridad *relativa del día*, no una probabilidad de compra en bruto.
+
+## Qué haría con más tiempo
+
+- **Objeción principal y forma de pago explícitas** en la extracción IA (hoy el crédito se infiere por la cuota mensual).
+- Vista **"mis leads de hoy" por asesor** aprovechando `asesores.csv` y su `capacidad_diaria_leads` (42 asesores ya ingeridos).
+- **Alertas de primer contacto en 24 horas**, atacando directamente el 40% de leads sin gestionar que menciona el gerente comercial.
+- Reentrenamiento con ventana móvil y monitoreo de drift del AUC en el CI.
+- Ampliar cobertura de pruebas del dashboard (`app.py`) en la suite de CI.
